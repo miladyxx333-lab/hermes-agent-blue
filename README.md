@@ -1,147 +1,181 @@
 <p align="center">
-  <img src="assets/banner.png" alt="Hermes Agent" width="100%">
+  <img src="assets/banner.png" alt="Hermes Agent Blue" width="100%">
 </p>
 
-# Hermes Agent Blue ⚕💙
+# ◈ Claviger — Privacy Skill for Hermes Agent ⚕💙
 
 <p align="center">
-  <a href="https://hermes-agent.nousresearch.com/docs/"><img src="https://img.shields.io/badge/Docs-hermes--agent.nousresearch.com-FFD700?style=for-the-badge" alt="Documentation"></a>
+  <a href="https://claviger-forge.miladyxx333.workers.dev"><img src="https://img.shields.io/badge/Live%20Demo-Claviger%20Forge-6366f1?style=for-the-badge" alt="Live Demo"></a>
   <a href="https://discord.gg/NousResearch"><img src="https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord"></a>
   <a href="https://github.com/NousResearch/hermes-agent/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License: MIT"></a>
 </p>
 
-**Hermes Agent Blue** is a specialized fork of the self-improving AI agent by [Nous Research](https://nousresearch.com), enhanced with the **Claviger Privacy Protocol**. It's the only agent with a built-in learning loop and native cryptographic privacy.
+<p align="center"><b>🔐 Agents That Keep Secrets</b></p>
 
-Use any model you want — [Nous Portal](https://portal.nousresearch.com), [Gemini](https://ai.google.dev/) (via Google AI SDK), [OpenRouter](https://openrouter.ai), or your own endpoint. Switch with `hermes model` — no code changes, no lock-in.
+**Claviger** (*Faber Clavium* — The Forger of Keys) is the first **native privacy skill** for [Hermes Agent](https://github.com/NousResearch/hermes-agent). It gives any AI agent the power of **real cryptographic privacy** — not simulated, not mocked, but mathematically proven ECIES encryption with decentralized IPFS storage.
 
-<table>
-<tr><td><b>A real terminal interface</b></td><td>Full TUI with multiline editing, slash-command autocomplete, conversation history, interrupt-and-redirect, and streaming tool output.</td></tr>
-<tr><td><b>Lives where you do</b></td><td>Telegram, Discord, Slack, WhatsApp, Signal, and CLI — all from a single gateway process. Voice memo transcription, cross-platform conversation continuity.</td></tr>
-<tr><td><b>A closed learning loop</b></td><td>Agent-curated memory with periodic nudges. Autonomous skill creation after complex tasks. Skills self-improve during use. FTS5 session search with LLM summarization for cross-session recall. <a href="https://github.com/plastic-labs/honcho">Honcho</a> dialectic user modeling. Compatible with the <a href="https://agentskills.io">agentskills.io</a> open standard.</td></tr>
-<tr><td><b>Scheduled automations</b></td><td>Built-in cron scheduler with delivery to any platform. Daily reports, nightly backups, weekly audits — all in natural language, running unattended.</td></tr>
-<tr><td><b>Delegates and parallelizes</b></td><td>Spawn isolated subagents for parallel workstreams. Write Python scripts that call tools via RPC, collapsing multi-step pipelines into zero-context-cost turns.</td></tr>
-<tr><td><b>Runs anywhere, not just your laptop</b></td><td>Six terminal backends — local, Docker, SSH, Daytona, Singularity, and Modal. Daytona and Modal offer serverless persistence — your agent's environment hibernates when idle and wakes on demand, costing nearly nothing between sessions. Run it on a $5 VPS or a GPU cluster.</td></tr>
-<tr><td><b>Research-ready</b></td><td>Batch trajectory generation, Atropos RL environments, trajectory compression for training the next generation of tool-calling models.</td></tr>
-<tr><td><b>Native Privacy (Claviger)</b></td><td>Pre-bundled with the Claviger Protocol for ECIES-AES-256-GCM encryption, IPFS storage, and Cloudflare KV indexing. Forge and unlock agent secrets natively.</td></tr>
-</table>
+> *Two agents want to coordinate a strategy over public channels without leaking intent to adversaries. They call the Claviger Scribe. The Scribe forges an encrypted lockbox, seals it on IPFS, and only the intended recipient can open it. To everyone else, it's noise.*
 
 ---
 
-## Quick Install
+## 🏗️ Architecture — Real, Not Mocked
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    HERMES AGENT (Gemini 2.5)                │
+│                                                             │
+│  User: "/claviger forge my-secret for agent-B"              │
+│                          │                                  │
+│                    ┌─────▼──────┐                           │
+│                    │  CLAVIGER  │                            │
+│                    │   SKILL    │                            │
+│                    └─────┬──────┘                            │
+│                          │                                  │
+│              ┌───────────┼───────────┐                      │
+│              ▼           ▼           ▼                      │
+│        ┌──────────┐ ┌─────────┐ ┌──────────┐               │
+│        │  ECIES   │ │  IPFS   │ │   KV     │               │
+│        │ Encrypt  │ │ Pinata  │ │Cloudflare│               │
+│        │secp256k1 │ │  Pin    │ │  Index   │               │
+│        │AES-256   │ │         │ │          │               │
+│        └──────────┘ └─────────┘ └──────────┘               │
+│              │           │           │                      │
+│              ▼           ▼           ▼                      │
+│         144 bytes   ipfs://QmX...  vault:02f4...            │
+│         encrypted   immutable      discoverable             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+Every component is **production-grade and live**:
+
+| Layer | Technology | What It Does |
+|-------|-----------|-------------|
+| **Encryption** | ECIES (secp256k1 + AES-256-GCM) | Asymmetric encryption using Ethereum-compatible keys. Only the recipient's private key can decrypt. |
+| **Storage** | IPFS via Pinata Cloud | Content-addressable, immutable, decentralized storage. The encrypted blob lives forever. |
+| **Indexing** | Cloudflare Workers KV | Global low-latency index mapping recipient keys to lockbox CIDs. |
+| **AI Scribe** | Cloudflare Workers AI (Llama 3.1 8B) | An AI oracle that helps agents forge cryptographic strategies and mutant languages. |
+| **Payments** | x402 Protocol (Coinbase HTTP 402) | Premium forge pathway: pay 5 USDC on Base, the Scribe forges autonomously. |
+
+---
+
+## 🔐 The Claviger Skill
+
+Pre-installed at `skills/crypto/claviger/`. The agent discovers it automatically via `/claviger`.
+
+```
+skills/crypto/claviger/
+├── SKILL.md                    # Hermes-native skill definition
+├── scripts/
+│   └── claviger_box.py         # ECIES + IPFS + KV engine
+├── references/
+│   ├── forge-api.md            # Forge Worker API docs
+│   └── x402-integration.md     # x402 premium pathway
+└── requirements.txt            # eciespy, requests
+```
+
+### Commands
+
+| Command | What It Does |
+|---------|-------------|
+| `forge` | Encrypt a secret with ECIES → upload to IPFS → register on Cloudflare KV |
+| `unlock` | Download lockbox from IPFS → decrypt with private key → reveal secret |
+| `scribe` | Talk to the AI Scribe oracle for cryptographic advice |
+| `list` | View all indexed lockboxes on Cloudflare KV |
+| `protocol` | Show full API discovery info (endpoints, pricing, pathways) |
+
+### Live Proof — Real Encryption, Real IPFS, Real KV
+
+```
+◈ CLAVIGER FORGE SEQUENCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔐 [1/3] ECIES Encryption (secp256k1 + AES-256-GCM)...
+   ✅ Encrypted: 144 bytes
+📤 [2/3] Uploading to IPFS (Pinata)...
+   ✅ Pinned: ipfs://QmXrfcVoggLnDar3W2DUMARG2xf6qc3pbq812hdsQoWDZn
+☁️  [3/3] Registering on Cloudflare KV...
+   ✅ Indexed on Cloudflare Workers KV
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔒 LOCKBOX SEALED
+   CID: QmXrfcVoggLnDar3W2DUMARG2xf6qc3pbq812hdsQoWDZn
+   URL: https://gateway.pinata.cloud/ipfs/QmXrfcVoggLnDar3W2DUMARG2xf6qc3pbq812hdsQoWDZn
+```
+
+```
+◈ CLAVIGER VAULT — UNLOCKING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📥 [1/2] Retrieving lockbox from IPFS...
+   ✅ Downloaded: 144 bytes
+🗝️  [2/2] ECIES Decryption...
+   ✅ Decryption successful!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔓 SECRET REVEALED:
+{
+  "msg": "Claviger IPFS Test",
+  "status": "LIVE"
+}
+```
+
+> ☝️ This is a real output from a real test. The CID is live on IPFS right now.
+
+---
+
+## 💎 x402 Premium Forge (Agent-as-a-Service)
+
+For agents that want the Scribe to forge lockboxes **autonomously**:
+
+1. `POST /api/forge-premium` without payment → receive **HTTP 402** with payment instructions
+2. Pay **5 USDC on Base Mainnet** to the indicated address
+3. Re-send with `X-Payment` header → lockbox is forged, sealed, and indexed automatically
+
+This implements the [x402 Protocol](https://docs.x402.org) by Coinbase — true agent-to-agent micropayments.
+
+---
+
+## ⚕ Built on Hermes Agent
+
+This is a specialized fork of [Hermes Agent v0.2.0](https://github.com/NousResearch/hermes-agent) by Nous Research, the self-improving AI agent with:
+
+- **Self-learning skills** — creates and improves skills from experience
+- **Multi-platform** — CLI, Telegram, Discord, Slack, WhatsApp, Signal
+- **Any model** — Gemini, OpenRouter (200+ models), Nous Portal, or your own
+- **Terminal backends** — local, Docker, SSH, Modal, Singularity
+- **Persistent memory** — cross-session recall with LLM summarization
+
+### Quick Install
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
+source ~/.zshrc
+hermes setup
 ```
 
-Works on Linux, macOS, and WSL2. The installer handles everything — Python, Node.js, dependencies, and the `hermes` command. No prerequisites except git.
-
-> **Windows:** Native Windows is not supported. Please install [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) and run the command above.
-
-After installation:
-
+Then install the Claviger skill:
 ```bash
-source ~/.bashrc    # reload shell (or: source ~/.zshrc)
-hermes              # start chatting!
+cp -r skills/crypto/claviger ~/.hermes/skills/crypto/claviger
+hermes chat -q "/claviger help"
 ```
 
 ---
 
-## Getting Started
+## 🤖 Human-Agent Collaboration
 
-```bash
-hermes              # Interactive CLI — start a conversation
-hermes model        # Choose your LLM provider and model
-hermes tools        # Configure which tools are enabled
-hermes config set   # Set individual config values
-hermes gateway      # Start the messaging gateway (Telegram, Discord, etc.)
-hermes setup        # Run the full setup wizard (configures everything at once)
-hermes claw migrate # Migrate from OpenClaw (if coming from OpenClaw)
-hermes update       # Update to the latest version
-hermes doctor       # Diagnose any issues
-```
+This project was built through a documented human-agent collaboration:
 
-📖 **[Full documentation →](https://hermes-agent.nousresearch.com/docs/)**
+- **Human**: Uriel Hernandez (Builder) — idea, direction, and creative vision
+- **Agent**: Antigravity — architecture, code, encryption implementation, and deployment
+
+The idea emerged from asking: *"How do agents keep secrets?"* — and evolved into a full cryptographic protocol where agents can communicate privately over public channels using ephemeral "mutant languages" sealed in ECIES lockboxes.
 
 ---
 
-## Documentation
+## 📦 Links
 
-All documentation lives at **[hermes-agent.nousresearch.com/docs](https://hermes-agent.nousresearch.com/docs/)**:
-
-| Section | What's Covered |
-|---------|---------------|
-| [Quickstart](https://hermes-agent.nousresearch.com/docs/getting-started/quickstart) | Install → setup → first conversation in 2 minutes |
-| [CLI Usage](https://hermes-agent.nousresearch.com/docs/user-guide/cli) | Commands, keybindings, personalities, sessions |
-| [Configuration](https://hermes-agent.nousresearch.com/docs/user-guide/configuration) | Config file, providers, models, all options |
-| [Messaging Gateway](https://hermes-agent.nousresearch.com/docs/user-guide/messaging) | Telegram, Discord, Slack, WhatsApp, Signal, Home Assistant |
-| [Security](https://hermes-agent.nousresearch.com/docs/user-guide/security) | Command approval, DM pairing, container isolation |
-| [Tools & Toolsets](https://hermes-agent.nousresearch.com/docs/user-guide/features/tools) | 40+ tools, toolset system, terminal backends |
-| [Skills System](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills) | Procedural memory, Skills Hub, creating skills |
-| [Memory](https://hermes-agent.nousresearch.com/docs/user-guide/features/memory) | Persistent memory, user profiles, best practices |
-| [MCP Integration](https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp) | Connect any MCP server for extended capabilities |
-| [Cron Scheduling](https://hermes-agent.nousresearch.com/docs/user-guide/features/cron) | Scheduled tasks with platform delivery |
-| [Context Files](https://hermes-agent.nousresearch.com/docs/user-guide/features/context-files) | Project context that shapes every conversation |
-| [Architecture](https://hermes-agent.nousresearch.com/docs/developer-guide/architecture) | Project structure, agent loop, key classes |
-| [Contributing](https://hermes-agent.nousresearch.com/docs/developer-guide/contributing) | Development setup, PR process, code style |
-| [CLI Reference](https://hermes-agent.nousresearch.com/docs/reference/cli-commands) | All commands and flags |
-| [Environment Variables](https://hermes-agent.nousresearch.com/docs/reference/environment-variables) | Complete env var reference |
-
----
-
-## Migrating from OpenClaw
-
-If you're coming from OpenClaw, Hermes can automatically import your settings, memories, skills, and API keys.
-
-**During first-time setup:** The setup wizard (`hermes setup`) automatically detects `~/.openclaw` and offers to migrate before configuration begins.
-
-**Anytime after install:**
-
-```bash
-hermes claw migrate              # Interactive migration (full preset)
-hermes claw migrate --dry-run    # Preview what would be migrated
-hermes claw migrate --preset user-data   # Migrate without secrets
-hermes claw migrate --overwrite  # Overwrite existing conflicts
-```
-
-What gets imported:
-- **SOUL.md** — persona file
-- **Memories** — MEMORY.md and USER.md entries
-- **Skills** — user-created skills → `~/.hermes/skills/openclaw-imports/`
-- **Command allowlist** — approval patterns
-- **Messaging settings** — platform configs, allowed users, working directory
-- **API keys** — allowlisted secrets (Telegram, OpenRouter, OpenAI, Anthropic, ElevenLabs)
-- **TTS assets** — workspace audio files
-- **Workspace instructions** — AGENTS.md (with `--workspace-target`)
-
-See `hermes claw migrate --help` for all options, or use the `openclaw-migration` skill for an interactive agent-guided migration with dry-run previews.
-
----
-
-## Contributing
-
-We welcome contributions! See the [Contributing Guide](https://hermes-agent.nousresearch.com/docs/developer-guide/contributing) for development setup, code style, and PR process.
-
-Quick start for contributors:
-
-```bash
-git clone --recurse-submodules https://github.com/NousResearch/hermes-agent.git
-cd hermes-agent
-curl -LsSf https://astral.sh/uv/install.sh | sh
-uv venv .venv --python 3.11
-source .venv/bin/activate
-uv pip install -e ".[all,dev]"
-uv pip install -e "./mini-swe-agent"
-python -m pytest tests/ -q
-```
-
----
-
-## Community
-
-- 💬 [Discord](https://discord.gg/NousResearch)
-- 📚 [Skills Hub](https://agentskills.io)
-- 🐛 [Issues](https://github.com/NousResearch/hermes-agent/issues)
-- 💡 [Discussions](https://github.com/NousResearch/hermes-agent/discussions)
+| Resource | URL |
+|----------|-----|
+| **Live Claviger Forge UI** | [claviger-forge.miladyxx333.workers.dev](https://claviger-forge.miladyxx333.workers.dev) |
+| **Live IPFS Lockbox** | [gateway.pinata.cloud/ipfs/QmXrfc...](https://gateway.pinata.cloud/ipfs/QmXrfcVoggLnDar3W2DUMARG2xf6qc3pbq812hdsQoWDZn) |
+| **Hermes Agent (upstream)** | [github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
+| **Hackathon** | Hermes Agent Hackathon by @NousResearch |
 
 ---
 
@@ -149,4 +183,4 @@ python -m pytest tests/ -q
 
 MIT — see [LICENSE](LICENSE).
 
-Built by [Nous Research](https://nousresearch.com).
+**◈ Claviger Protocol** — *Forged for the Digital Underground.*
