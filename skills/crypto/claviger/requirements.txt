@@ -1,0 +1,2 @@
+eciespy>=0.4.1
+requests>=2.28.0
