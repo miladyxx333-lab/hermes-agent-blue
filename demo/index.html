@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claviger × Hermes Agent — Live Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --surface: #12121a;
+  --border: #1e1e2e;
+  --accent: #6366f1;
+  --accent-glow: rgba(99, 102, 241, 0.4);
+  --green: #22c55e;
+  --green-glow: rgba(34, 197, 94, 0.3);
+  --cyan: #22d3ee;
+  --yellow: #fbbf24;
+  --red: #ef4444;
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: 'Inter', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* ─── INTRO SCREEN ─── */
+#intro {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  background: var(--bg);
+  transition: opacity 0.8s ease;
+}
+#intro.hidden { opacity: 0; pointer-events: none; }
+
+#intro h1 {
+  font-size: 4rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #6366f1, #a78bfa, #22d3ee);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+#intro .subtitle {
+  font-size: 1.3rem;
+  color: var(--muted);
+  margin-top: 12px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+#intro .badge {
+  margin-top: 28px;
+  padding: 8px 20px;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: var(--accent);
+  letter-spacing: 2px;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { filter: drop-shadow(0 0 12px var(--accent-glow)); }
+  50% { filter: drop-shadow(0 0 24px var(--accent-glow)); }
+}
+
+/* ─── MAIN LAYOUT ─── */
+#main {
+  display: none;
+  width: 100vw;
+  height: 100vh;
+  flex-direction: column;
+}
+#main.active { display: flex; }
+
+/* ─── TOP BAR ─── */
+.topbar {
+  height: 48px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 14px;
+  flex-shrink: 0;
+}
+.topbar .dot { width: 12px; height: 12px; border-radius: 50%; }
+.topbar .dot.r { background: #ef4444; }
+.topbar .dot.y { background: #fbbf24; }
+.topbar .dot.g { background: #22c55e; }
+.topbar .title {
+  flex: 1;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.topbar .live-badge {
+  padding: 3px 10px;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 4px;
+  font-size: 0.7rem;
+  color: #ef4444;
+  font-weight: 600;
+  letter-spacing: 1px;
+  animation: blink 1.5s ease-in-out infinite;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ─── CONTENT AREA ─── */
+.content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ─── TERMINAL ─── */
+.terminal {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.7;
+  background: var(--bg);
+}
+.terminal::-webkit-scrollbar { width: 6px; }
+.terminal::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.line { opacity: 0; animation: fadeInLine 0.15s ease forwards; }
+.line.prompt { color: var(--accent); }
+.line.output { color: var(--text); }
+.line.success { color: var(--green); }
+.line.error { color: var(--red); }
+.line.info { color: var(--cyan); }
+.line.warning { color: var(--yellow); }
+.line.muted { color: var(--muted); }
+.line.header {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.line.separator { color: var(--border); }
+.line.bold { font-weight: 700; }
+
+@keyframes fadeInLine { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ─── SIDEBAR ─── */
+.sidebar {
+  width: 320px;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.card {
+  background: rgba(99, 102, 241, 0.05);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  opacity: 0;
+  transition: opacity 0.5s ease, border-color 0.3s;
+}
+.card.visible { opacity: 1; }
+.card.active { border-color: var(--accent); box-shadow: 0 0 20px var(--accent-glow); }
+.card.complete { border-color: var(--green); box-shadow: 0 0 12px var(--green-glow); }
+
+.card h3 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.card .value {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text);
+  word-break: break-all;
+}
+.card .status {
+  margin-top: 8px;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.card .status.pending { color: var(--yellow); }
+.card .status.done { color: var(--green); }
+.card .status.live { color: var(--red); }
+
+/* ─── BOTTOM BAR ─── */
+.bottombar {
+  height: 40px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--muted);
+  gap: 20px;
+  flex-shrink: 0;
+}
+.bottombar .indicator {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: blink 1s ease-in-out infinite;
+}
+
+/* ─── PHASE OVERLAY ─── */
+.phase-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  background: rgba(10, 10, 15, 0.92);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.phase-overlay.show { opacity: 1; pointer-events: auto; }
+.phase-overlay h2 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #6366f1, #22d3ee);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+}
+.phase-overlay .phase-sub {
+  text-align: center;
+  color: var(--muted);
+  font-size: 1rem;
+  margin-top: 8px;
+}
+
+/* ─── OUTRO ─── */
+#outro {
+  position: fixed;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  background: var(--bg);
+}
+#outro.active { display: flex; }
+#outro h1 {
+  font-size: 3.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #22c55e, #6366f1, #22d3ee);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+#outro .links { 
+  margin-top: 24px; 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  gap: 8px; 
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+#outro .links a { color: var(--cyan); text-decoration: none; }
+#outro .tagline {
+  margin-top: 32px;
+  font-size: 1.1rem;
+  color: var(--text);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+</style>
+</head>
+<body>
+
+<!-- INTRO -->
+<div id="intro">
+  <h1>◈ CLAVIGER</h1>
+  <div class="subtitle">Privacy Skill for Hermes Agent</div>
+  <div class="badge">HERMES AGENT HACKATHON — NOUS RESEARCH</div>
+</div>
+
+<!-- PHASE OVERLAY -->
+<div class="phase-overlay" id="phaseOverlay">
+  <div>
+    <h2 id="phaseTitle"></h2>
+    <div class="phase-sub" id="phaseSub"></div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <div class="topbar">
+    <div class="dot r"></div>
+    <div class="dot y"></div>
+    <div class="dot g"></div>
+    <div class="title">hermes chat — Claviger Privacy Protocol</div>
+    <div class="live-badge">● LIVE</div>
+  </div>
+
+  <div class="content">
+    <div class="terminal" id="terminal"></div>
+    <div class="sidebar">
+      <div class="card" id="cardEncryption">
+        <h3>🔐 Encryption</h3>
+        <div class="value" id="encValue">Waiting...</div>
+        <div class="status pending" id="encStatus">⏳ Pending</div>
+      </div>
+      <div class="card" id="cardIPFS">
+        <h3>📦 IPFS Storage</h3>
+        <div class="value" id="ipfsValue">Waiting...</div>
+        <div class="status pending" id="ipfsStatus">⏳ Pending</div>
+      </div>
+      <div class="card" id="cardKV">
+        <h3>☁️ Cloudflare KV</h3>
+        <div class="value" id="kvValue">Waiting...</div>
+        <div class="status pending" id="kvStatus">⏳ Pending</div>
+      </div>
+      <div class="card" id="cardVault">
+        <h3>🗝️ Vault Unlock</h3>
+        <div class="value" id="vaultValue">Waiting...</div>
+        <div class="status pending" id="vaultStatus">⏳ Pending</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottombar">
+    <div class="indicator"></div>
+    <span>Hermes v0.2.0</span>
+    <span>|</span>
+    <span>Gemini 2.5 Flash</span>
+    <span>|</span>
+    <span>Claviger v1.0.0</span>
+    <span>|</span>
+    <span>secp256k1 + AES-256-GCM</span>
+  </div>
+</div>
+
+<!-- OUTRO -->
+<div id="outro">
+  <h1>◈ CLAVIGER</h1>
+  <div class="tagline">Agents That Keep Secrets</div>
+  <div class="links">
+    <span>🔗 <a href="#">claviger-forge.miladyxx333.workers.dev</a></span>
+    <span>📦 <a href="#">github.com/miladyxx333-lab/hermes-agent-blue</a></span>
+    <span>⚕ Built on Hermes Agent by @NousResearch</span>
+  </div>
+</div>
+
+<script>
+const terminal = document.getElementById('terminal');
+let lineDelay = 0;
+
+function addLine(text, cls = 'output', delay = 80) {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      const div = document.createElement('div');
+      div.className = `line ${cls}`;
+      div.textContent = text;
+      terminal.appendChild(div);
+      terminal.scrollTop = terminal.scrollHeight;
+      resolve();
+    }, delay);
+  });
+}
+
+function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function showCard(id) {
+  document.getElementById(id).classList.add('visible');
+}
+function activateCard(id) {
+  document.getElementById(id).classList.add('active');
+}
+function completeCard(id) {
+  const el = document.getElementById(id);
+  el.classList.remove('active');
+  el.classList.add('complete');
+}
+
+function updateCard(id, value, status, statusClass) {
+  document.getElementById(id.replace('card', '').toLowerCase() + 'Value').textContent = value;
+  const statusEl = document.getElementById(id.replace('card', '').toLowerCase() + 'Status');
+  statusEl.textContent = status;
+  statusEl.className = `status ${statusClass}`;
+}
+
+async function showPhase(title, sub, duration = 1800) {
+  const overlay = document.getElementById('phaseOverlay');
+  document.getElementById('phaseTitle').textContent = title;
+  document.getElementById('phaseSub').textContent = sub;
+  overlay.classList.add('show');
+  await wait(duration);
+  overlay.classList.remove('show');
+  await wait(400);
+}
+
+async function runDemo() {
+  // ═══ INTRO (3s) ═══
+  await wait(3000);
+  document.getElementById('intro').classList.add('hidden');
+  await wait(800);
+  document.getElementById('main').classList.add('active');
+
+  // Show all cards
+  await wait(300);
+  showCard('cardEncryption');
+  await wait(200);
+  showCard('cardIPFS');
+  await wait(200);
+  showCard('cardKV');
+  await wait(200);
+  showCard('cardVault');
+
+  // ═══ PHASE 1: SKILL DISCOVERY ═══
+  await showPhase('Phase 1: Skill Discovery', 'Hermes loads the Claviger privacy skill');
+
+  await addLine('$ hermes chat --toolsets skills', 'prompt', 0);
+  await wait(300);
+  await addLine('', 'output', 100);
+  await addLine('⚕ NOUS HERMES — Nous Research', 'header', 100);
+  await addLine('  ● gemini-2.5-flash · 3 tools · toolsets: skills', 'info', 100);
+  await addLine('', 'output', 100);
+  await addLine('> /claviger help', 'prompt', 400);
+  await wait(600);
+  await addLine('', 'output', 100);
+  await addLine('  📚 skill_list → scanning skills...', 'muted', 200);
+  await addLine('  📚 skill_view → loading claviger...', 'muted', 200);
+  await wait(400);
+  await addLine('', 'output', 100);
+  await addLine('  ◈ CLAVIGER: The Privacy Protocol Skill', 'header', 100);
+  await addLine('  ─────────────────────────────────────────', 'separator', 80);
+  await addLine('  You are equipped with Claviger (Faber Clavium)', 'output', 80);
+  await addLine('  Commands:', 'output', 80);
+  await addLine('    • forge    — ECIES encrypt + IPFS upload', 'info', 80);
+  await addLine('    • unlock   — Download + decrypt lockbox', 'info', 80);
+  await addLine('    • scribe   — Talk to the AI oracle', 'info', 80);
+  await addLine('    • list     — View indexed lockboxes', 'info', 80);
+  await addLine('    • protocol — API discovery', 'info', 80);
+
+  await wait(800);
+
+  // ═══ PHASE 2: FORGE ═══
+  await showPhase('Phase 2: Forge a Lockbox', 'Real ECIES encryption → Real IPFS upload → Real KV indexing');
+
+  await addLine('', 'output', 100);
+  await addLine('> Forge a secret lockbox with intent: "buy ETH at $4200"', 'prompt', 0);
+  await wait(500);
+  await addLine('', 'output', 100);
+  await addLine('  Executing claviger forge sequence...', 'muted', 200);
+  await addLine('', 'output', 100);
+  await addLine('◈ CLAVIGER FORGE SEQUENCE', 'header', 200);
+  await addLine('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'separator', 100);
+
+  // Step 1: Encryption
+  activateCard('cardEncryption');
+  updateCard('cardEncryption', 'Processing...', '⚡ Encrypting', 'live');
+  await addLine('🔐 [1/3] ECIES Encryption (secp256k1 + AES-256-GCM)...', 'output', 300);
+  await wait(600);
+  await addLine('   ✅ Encrypted: 144 bytes', 'success', 200);
+  updateCard('cardEncryption', 'ECIES-AES-256-GCM · 144 bytes', '✅ Sealed', 'done');
+  completeCard('cardEncryption');
+
+  await wait(400);
+
+  // Step 2: IPFS
+  activateCard('cardIPFS');
+  updateCard('cardIPFS', 'Uploading to Pinata...', '⚡ Uploading', 'live');
+  await addLine('📤 [2/3] Uploading to IPFS (Pinata)...', 'output', 200);
+  await wait(800);
+  await addLine('   ✅ Pinned: ipfs://QmXrfcVoggLnDar3W2DUMARG2xf6qc3pbq812hdsQoWDZn', 'success', 200);
+  updateCard('cardIPFS', 'QmXrfcVogg...QoWDZn', '✅ Pinned on IPFS', 'done');
+  completeCard('cardIPFS');
+
+  await wait(400);
+
+  // Step 3: KV
+  activateCard('cardKV');
+  updateCard('cardKV', 'Registering CID...', '⚡ Indexing', 'live');
+  await addLine('☁️  [3/3] Registering on Cloudflare KV...', 'output', 200);
+  await wait(600);
+  await addLine('   ✅ Indexed on Cloudflare Workers KV', 'success', 200);
+  updateCard('cardKV', 'vault:02f48b3f → QmXrfc...', '✅ Globally indexed', 'done');
+  completeCard('cardKV');
+
+  await wait(300);
+  await addLine('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'separator', 100);
+  await addLine('🔒 LOCKBOX SEALED', 'success', 100);
+  await addLine('   CID: QmXrfcVoggLnDar3W2DUMARG2xf6qc3pbq812hdsQoWDZn', 'info', 80);
+  await addLine('   URL: https://gateway.pinata.cloud/ipfs/QmXrfc...', 'muted', 80);
+
+  await wait(1200);
+
+  // ═══ PHASE 3: UNLOCK ═══
+  await showPhase('Phase 3: Unlock the Vault', 'Download from IPFS + Decrypt with private key');
+
+  await addLine('', 'output', 100);
+  await addLine('> Now unlock it with the recipient private key', 'prompt', 0);
+  await wait(500);
+  await addLine('', 'output', 100);
+  await addLine('◈ CLAVIGER VAULT — UNLOCKING', 'header', 200);
+  await addLine('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'separator', 100);
+
+  activateCard('cardVault');
+  updateCard('cardVault', 'Downloading from IPFS...', '⚡ Retrieving', 'live');
+  await addLine('📥 [1/2] Retrieving lockbox from IPFS...', 'output', 200);
+  await wait(600);
+  await addLine('   ✅ Downloaded: 144 bytes', 'success', 200);
+
+  updateCard('cardVault', 'Decrypting...', '⚡ Decrypting', 'live');
+  await addLine('🗝️  [2/2] ECIES Decryption...', 'output', 200);
+  await wait(600);
+  await addLine('   ✅ Decryption successful!', 'success', 200);
+
+  await addLine('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'separator', 100);
+  await addLine('🔓 SECRET REVEALED:', 'success', 100);
+  await addLine('{', 'info', 80);
+  await addLine('  "intent": "buy ETH",', 'info', 80);
+  await addLine('  "price": "$4200",', 'info', 80);
+  await addLine('  "status": "LIVE"', 'info', 80);
+  await addLine('}', 'info', 80);
+
+  updateCard('cardVault', '{"intent":"buy ETH"...}', '✅ Secret revealed', 'done');
+  completeCard('cardVault');
+
+  await wait(1500);
+
+  // ═══ PHASE 4: PROTOCOL ═══
+  await showPhase('Phase 4: Protocol Discovery', 'Open protocol — any agent can participate');
+
+  await addLine('', 'output', 100);
+  await addLine('> Show the protocol info for other agents', 'prompt', 0);
+  await wait(400);
+  await addLine('', 'output', 100);
+  await addLine('◈ CLAVIGER PROTOCOL DISCOVERY', 'header', 200);
+  await addLine('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'separator', 100);
+  await addLine('{', 'output', 80);
+  await addLine('  "name": "Claviger Protocol",', 'output', 80);
+  await addLine('  "version": "1.0.0",', 'output', 80);
+  await addLine('  "pathways": {', 'output', 80);
+  await addLine('    "open": {', 'output', 80);
+  await addLine('      "description": "Download skill, self-host crypto",', 'info', 80);
+  await addLine('      "cost": "Free (Public Good)"', 'info', 80);
+  await addLine('    },', 'output', 80);
+  await addLine('    "premium": {', 'output', 80);
+  await addLine('      "description": "Agent-as-a-Service via x402",', 'warning', 80);
+  await addLine('      "protocol": "x402 (HTTP 402 Payment Required)",', 'warning', 80);
+  await addLine('      "cost": "5 USDC on Base Mainnet"', 'warning', 80);
+  await addLine('    }', 'output', 80);
+  await addLine('  }', 'output', 80);
+  await addLine('}', 'output', 80);
+
+  await wait(2000);
+
+  // ═══ OUTRO ═══
+  document.getElementById('main').style.display = 'none';
+  document.getElementById('outro').classList.add('active');
+}
+
+// Start auto-play
+window.addEventListener('load', () => { runDemo(); });
+</script>
+</body>
+</html>
